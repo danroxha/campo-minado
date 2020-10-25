@@ -39,8 +39,8 @@ int main(){
 void criarCampoMinado(struct CampoMinado* campoMinado) {
   
   srand(clock());
+  
   campoMinado->bombas = 0;
-  int quantidadeDeBombas = 0;
   
   for(int i = 0; i < MAX; i++) {
     for(int j = 0; j < MAX; j++) {
@@ -63,32 +63,39 @@ void criarCampoMinado(struct CampoMinado* campoMinado) {
       }
         
       enum Porcentagem {
-        DEZ = 10, VINTE = 20, TRINTA_E_CINCO = 35, SESSENTA = 60, CEM = 100,
+        DEZ             = 10, 
+        VINTE           = 20, 
+        TRINTA_E_CINCO  = 35, 
+        SESSENTA        = 60, 
+        CEM             = 100
+      };
+
+      enum Niveis {
+        FACIL   = 1,
+        MEDIO   = 2,
+        DIFICIL = 3
       };
       
       int chanceDeBomba;
 
       switch(campoMinado->nivel) {
-        default: chanceDeBomba  = DEZ;            break;
-        case 1: chanceDeBomba   = VINTE;          break;
-        case 2: chanceDeBomba   = TRINTA_E_CINCO; break;
-        case 3: chanceDeBomba   = SESSENTA;       break;
+        default     : chanceDeBomba = DEZ;            break;
+        case FACIL  : chanceDeBomba = VINTE;          break;
+        case MEDIO  : chanceDeBomba = TRINTA_E_CINCO; break;
+        case DIFICIL: chanceDeBomba = SESSENTA;       break;
       }
       
       campoMinado->campo[i][j] = (char)(rand() % CEM <= chanceDeBomba )? BOMBA : VAZIO;
-      if(campoMinado->campo[i][j] == BOMBA )
-        quantidadeDeBombas++;
-
-
+      
+      if(campoMinado->campo[i][j] == BOMBA)
+        campoMinado->bombas++;
     }
   }
 
-  if(!quantidadeDeBombas) 
+  if(!campoMinado->bombas) 
     criarCampoMinado(campoMinado);
-  else {
-    campoMinado->bombas = quantidadeDeBombas;
-    campoMinado->jogadas = calcularJogadasDisponiveis(campoMinado->campo);    
-  }
+  else
+    campoMinado->jogadas = calcularJogadasDisponiveis(campoMinado->campo);
 
 }
 
