@@ -27,7 +27,7 @@ int calcularJogadasDisponiveis(char [MAX][MAX]);
 int main(){
 
   struct CampoMinado campoMinado;
-    campoMinado.nivel = 0;
+    campoMinado.nivel = 3;
     campoMinado.fimDoJogo = true;
   
   criarCampoMinado(&campoMinado);
@@ -103,14 +103,15 @@ void criarCampoMinado(struct CampoMinado* campoMinado) {
 void desenharCampoMinado(struct CampoMinado campoMinado) {
 
   system("clear");
+  printf("\033[40;7m");
   switch(campoMinado.nivel) {
-    default: printf("Nivel: Facil | "); break;
-    case 1: printf("Nivel: Medio | "); break;
-    case 2: printf("Nivel: Dificil | "); break;
-    case 3: printf("Nivel: Muito Dificil | "); break;
+    default: printf("Nivel: \033[34;3m Facil | "); break;
+    case 1: printf("Nivel: \033[32;3m Medio  | "); break;
+    case 2: printf("Nivel: \033[33;3m Dificil  | "); break;
+    case 3: printf("Nivel: \033[31;3m Muito Dificil  | "); break;
   }
 
-  printf("Bombas: %d | Jogadas: %d\n", campoMinado.bombas, campoMinado.jogadas);
+  printf("Bombas: %d | Jogadas: %d \033[0;0m\n", campoMinado.bombas, campoMinado.jogadas);
   printf("  12345678\n");
   
   for(int i = 0; i < MAX; i++) {
@@ -119,7 +120,7 @@ void desenharCampoMinado(struct CampoMinado campoMinado) {
 
     for(int j = 0; j < MAX; j++) {
      
-      if( campoMinado.campo[i][j] == BOMBA && campoMinado.fimDoJogo) printf("\033[1;31m*\033[0;0m");
+      if( campoMinado.campo[i][j] == BOMBA && campoMinado.fimDoJogo) printf("\033[33;31;5m*\033[0;0m");
       else if( campoMinado.campo[i][j] == 21 ) printf("\033[1;34m\u2554\033[0;0m"); // "\u2554: ╔"
       else if( campoMinado.campo[i][j] == 22 ) printf("\033[1;34m\u2557\033[0;0m"); // "\u2557: ╗"
       else if( campoMinado.campo[i][j] == 23 ) printf("\033[1;34m\u255A\033[0;0m"); // "\u255A: ╚"
@@ -134,13 +135,17 @@ void desenharCampoMinado(struct CampoMinado campoMinado) {
   }
 
   if( campoMinado.fimDoJogo && campoMinado.jogadas > 0)
-    printf("\033[41;1m VOCÊ PERDEU! \033[0;0m\n");
+    printf("\033[47;31;7m VOCÊ PERDEU! \033[0;0m\n");
+    // printf("\033[47;6;31;7m VOCÊ PERDEU! \033[0;0m\n");
+
+    // printf("\033[41;1m ");
   
   // printf("\033[43;31m VOCÊ PERDEU! \033[0;0m\n");
   // printf("\033[42;1m VOCÊ GANHOU! \033[0;0m\n");
-    // printf("\n");
+  // printf("\n");
+  
   printf("SAIR (0,0) | NOVO JOGO (9,9)\n");
-  printf("VERIFICAR A POSICAO (x, y): ");
+  printf("COMANDO | POSICAO (x, y): ");
 }
 
 
@@ -151,7 +156,7 @@ void gerarDica(struct CampoMinado* campoMinado) {
     
       if(campoMinado->campo[i][j] == BOMBA) {
         // Adicionar +1 ao redor das bombas
-        for(int y = i - 1; y < i + 2; y++) {
+        for(int y = i - 1; y <= i + 1; y++) {
           
           bool limiteAlturaSuperior = y < 1; 
           bool limiteAlturaInferior = y > MAX - 2;
@@ -159,7 +164,7 @@ void gerarDica(struct CampoMinado* campoMinado) {
           if(limiteAlturaSuperior) y = 1;
           if(limiteAlturaInferior) continue;
 
-          for(int x = j - 1; x < j + 2; x++) { 
+          for(int x = j - 1; x <= j + 1; x++) { 
           
             bool limiteLateralEsquerdo = x < 1; 
             bool limiteLateralDireito  = x > MAX - 2;
@@ -184,9 +189,9 @@ int calcularJogadasDisponiveis(char campoMinado[MAX][MAX]) {
   
   int contador = 0;
   
-  for(int i = 1;  i < MAX - 2; i++) {
-    for(int j = 1;  j < MAX - 2; j++) {
-      if(campoMinado[i][j] != BOMBA)
+  for(int i = 1;  i < MAX - 1; i++) {
+    for(int j = 1;  j < MAX - 1; j++) {
+      if(campoMinado[i][j] >= VAZIO && campoMinado[i][j] < BOMBA)
         contador++;
     }
   }
