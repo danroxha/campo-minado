@@ -3,38 +3,16 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define parseInt(caracter) (caracter >= 48 && caracter <= 57)? caracter - 48: caracter
+#include "type.h"
+#include "banner.h"
+#include "util.h"
 
-
-#define MAX 10
-#define BOMBA 9
-#define VAZIO 0
-
-struct Coordenada
-{
-  int i;
-  int j;
-};
-
-struct CampoMinado
-{
-  char campo[MAX][MAX];
-  char campoJogadas[MAX][MAX];
-  int nivel;
-  int bombas;
-  int jogadas;
-  bool fimDoJogo;
-  struct Coordenada coordenada;
-};
 
 int calcularJogadasDisponiveis(char [MAX][MAX]);
 void criarCampoMinado(struct CampoMinado*);
 void gerarDica(struct CampoMinado*);
 void jogo(struct CampoMinado* );
 void desenharCampoMinado(struct CampoMinado);
-void introducao();
-void bannerMenu(void *);
-void bannerNivel(void *);
 void obterComando(int *opcao, void (*template)(void *), void *dados);
 
 
@@ -43,6 +21,9 @@ int main(){
   struct CampoMinado campoMinado;
     campoMinado.nivel = 1;
 
+  enum OPCOES {
+    INICAR_JOGO = 1, SELECIONAR_NIVEL = 2, SAIR = 3
+  };
 
   int opcao;
   introducao(); 
@@ -52,18 +33,16 @@ int main(){
     obterComando(&opcao, bannerMenu, NULL);
 
     switch(opcao){
-    case 1: 
+    case INICAR_JOGO: 
       jogo(&campoMinado);
       break;
-    case 2:
+    case SELECIONAR_NIVEL:
       obterComando(&campoMinado.nivel, bannerNivel, (void*) &campoMinado);
       break;
-    case 3:
-      exit(0);
     }
   }
 
-  while(opcao != 0);
+  while(opcao != SAIR);
   
 }
 
@@ -236,87 +215,6 @@ int calcularJogadasDisponiveis(char campoMinado[MAX][MAX]) {
   }
     
   return contador;
-}
-
-
-void introducao(){
-
-  system("clear");
-  
-  printf("::::::'######:::::'###::::'##::::'##:'########:::'#######::::::\n");
-  printf(":::::'##... ##:::'## ##::: ###::'###: ##.... ##:'##.... ##:::::\n");
-  printf("::::: ##:::..:::'##:. ##:: ####'####: ##:::: ##: ##:::: ##:::::\n");
-  printf("::::: ##:::::::'##:::. ##: ## ### ##: ########:: ##:::: ##:::::\n");
-  printf("::::: ##::::::: #########: ##. #: ##: ##.....::: ##:::: ##:::::\n");
-  printf("::::: ##::: ##: ##.... ##: ##:.:: ##: ##:::::::: ##:::: ##:::::\n");
-  printf(":::::. ######:: ##:::: ##: ##:::: ##: ##::::::::. #######::::::\n");
-  printf("::::::......:::..:::::..::..:::::..::..::::::::::.......:::::::\n");
-  
-  printf("\033[33;33;5m");
-  printf("::'##::::'##:'####:'##::: ##::::'###::::'########:::'#######:::\n");
-  printf(":: ###::'###:. ##:: ###:: ##:::'## ##::: ##.... ##:'##.... ##::\n");
-  printf(":: ####'####:: ##:: ####: ##::'##:. ##:: ##:::: ##: ##:::: ##::\n");
-  printf(":: ## ### ##:: ##:: ## ## ##:'##:::. ##: ##:::: ##: ##:::: ##::\n");
-  printf(":: ##. #: ##:: ##:: ##. ####: #########: ##:::: ##: ##:::: ##::\n");
-  printf(":: ##:.:: ##:: ##:: ##:. ###: ##.... ##: ##:::: ##: ##:::: ##::\n");
-  printf(":: ##:::: ##:'####: ##::. ##: ##:::: ##: ########::. #######:::\n");
-  printf("::..:::::..::....::..::::..::..:::::..::........::::.......::::\n");
-  printf("\033[0;0m\n");
-  
-  system("sleep 3");
-}
-
-
-void bannerMenu(void *dados) {
-  system("clear");
-  printf("   ___                              \n");
-  printf("  / __|  __ _   _ __    _ __   ___  \n");
-  printf(" | (__  / _` | | '  \\  | '_ \\ / _ \\ \n");
-  printf("  \\___| \\__,_| |_|_|_| | .__/ \\___/ \n");
-  printf("                       |_|          \n");
-  printf("          _                    _        \n");
-  printf("  _ __   (_)  _ _    __ _   __| |  ___  \n");
-  printf(" | '  \\  | | | ' \\  / _` | / _` | / _ \\ \n");
-  printf(" |_|_|_| |_| |_||_| \\__,_| \\__,_| \\___/ \n");
-                                         
-
-  printf("\n================ Menu =================\n");
-  printf("=          1 - Novo Jogo              =\n");
-  printf("=          2 - Selecionar Nivel       =\n");
-  printf("=          3 - Sair                   =\n");
-  printf("=======================================\n");
-  printf("Opcao: ");
-
-}
-
-
-void bannerNivel(void *dados) {
-
-  struct CampoMinado campoMinado = *(struct CampoMinado*)dados;
-  
-  system("clear");
-  switch(campoMinado.nivel) {
-    case 1: printf("\033[33;34m Facil  "); break;
-    case 2: printf("\033[33;32m Medio  "); break;
-    case 3: printf("\033[33;31m Dificil"); break;
-  }
-  
-  printf("   ▄   ▄█     ▄   ▄███▄   █     \n");
-  printf("    █  ██      █  █▀   ▀  █     \n");
-  printf("██   █ ██ █     █ ██▄▄    █     \n");
-  printf("█ █  █ ▐█  █    █ █▄   ▄▀ ███▄  \n");
-  printf("█  █ █  ▐   █  █  ▀███▀       ▀ \n");
-  printf("█   ██       █▐                 \n");
-  printf("             ▐                  \n");
-  printf("\033[0;0m\n");
-  printf("================================\n");
-  printf("=          1 - Facil           =\n");
-  printf("=          2 - Medio           =\n");
-  printf("=          3 - Dificil         =\n");
-  printf("================================\n");
-
-  printf("Selecionar: ");
-
 }
 
 
