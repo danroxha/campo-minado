@@ -10,19 +10,27 @@
 #define BOMBA 9
 #define VAZIO 0
 
+struct Coordenada
+{
+  int i;
+  int j;
+};
+
 struct CampoMinado
 {
   char campo[MAX][MAX];
+  char campoJogadas[MAX][MAX];
   int nivel;
   int bombas;
   int jogadas;
   bool fimDoJogo;
-
+  struct Coordenada coordenada;
 };
 
 int calcularJogadasDisponiveis(char [MAX][MAX]);
 void criarCampoMinado(struct CampoMinado*);
 void gerarDica(struct CampoMinado*);
+void jogo(struct CampoMinado* );
 void desenharCampoMinado(struct CampoMinado);
 void introducao();
 void bannerMenu(void *);
@@ -30,26 +38,22 @@ void bannerNivel(void *);
 void obterComando(int *opcao, void (*template)(void *), void *dados);
 
 
-
 int main(){
 
   struct CampoMinado campoMinado;
     campoMinado.nivel = 1;
-    campoMinado.fimDoJogo = true;
+
 
   int opcao;
-
   introducao(); 
-   
+
   do {
     
     obterComando(&opcao, bannerMenu, NULL);
 
     switch(opcao){
     case 1: 
-      system("clear");
-      printf("Game\n");
-      exit(0);
+      jogo(&campoMinado);
       break;
     case 2:
       obterComando(&campoMinado.nivel, bannerNivel, (void*) &campoMinado);
@@ -60,11 +64,7 @@ int main(){
   }
 
   while(opcao != 0);
-    
-
-  // criarCampoMinado(&campoMinado);
-  // gerarDica(&campoMinado);
-  // desenharCampoMinado(campoMinado);
+  
 }
 
 
@@ -73,9 +73,14 @@ void criarCampoMinado(struct CampoMinado* campoMinado) {
   srand(clock());
   
   campoMinado->bombas = 0;
+  campoMinado->fimDoJogo = false;
+  campoMinado->coordenada.i = 0;
+  campoMinado->coordenada.j = 0;
   
   for(int i = 0; i < MAX; i++) {
     for(int j = 0; j < MAX; j++) {
+
+      campoMinado->campoJogadas[i][j] = 0;
       
       bool primeiraLinha   = i == 0;
       bool ultimaLinha     = i == MAX - 1;
@@ -129,6 +134,7 @@ void criarCampoMinado(struct CampoMinado* campoMinado) {
   else
     campoMinado->jogadas = calcularJogadasDisponiveis(campoMinado->campo);
 
+  gerarDica(campoMinado);
 }
 
 
@@ -137,10 +143,9 @@ void desenharCampoMinado(struct CampoMinado campoMinado) {
   system("clear");
   printf("\033[40;7m");
   switch(campoMinado.nivel) {
-    default: printf("Nivel: \033[34;3m Facil | "); break;
-    case 1: printf("Nivel: \033[32;3m Medio  | "); break;
-    case 2: printf("Nivel: \033[33;3m Dificil  | "); break;
-    case 3: printf("Nivel: \033[31;3m Muito Dificil  | "); break;
+    case 1: printf("Nivel: \033[34;3m Facil | "); break;
+    case 2: printf("Nivel: \033[32;3m Medio  | "); break;
+    case 3: printf("Nivel: \033[31;3m Dificil  | "); break;
   }
 
   printf("Bombas: %d | Jogadas: %d \033[0;0m\n", campoMinado.bombas, campoMinado.jogadas);
@@ -159,7 +164,7 @@ void desenharCampoMinado(struct CampoMinado campoMinado) {
       else if( campoMinado.campo[i][j] == 24 ) printf("\033[1;34m\u255D\033[0;0m"); // "\u255D: ╝"
       else if( campoMinado.campo[i][j] == 25 ) printf("\033[1;34m\u2551\033[0;0m"); // "\u2551: ║"
       else if( campoMinado.campo[i][j] == 26 ) printf("\033[1;34m\u2550\033[0;0m"); // "\u2550: ═"
-      else if( campoMinado.campo[i][j] >= VAZIO && campoMinado.campo[i][j] <= BOMBA && !campoMinado.fimDoJogo ) printf("\u2B25"); // "\u2B25: ⬥" 
+      else if( campoMinado.campo[i][j] >= VAZIO && campoMinado.campo[i][j] <= BOMBA && !campoMinado.fimDoJogo && !campoMinado.campoJogadas[i][j]) printf("\u2B25"); // "\u2B25: ⬥" 
       else printf("\033[1;33m%d\033[0;0m", campoMinado.campo[i][j]);
     }
 
@@ -167,17 +172,19 @@ void desenharCampoMinado(struct CampoMinado campoMinado) {
   }
 
   if( campoMinado.fimDoJogo && campoMinado.jogadas > 0)
-    printf("\033[47;31;7m VOCÊ PERDEU! \033[0;0m\n");
+    printf("\033[47;31;7m VOCÊ PERDEU! BOMBA EM (%d, %d)\033[0;0m\n", campoMinado.coordenada.i, campoMinado.coordenada.j);
+  else
+    printf("\033[41;1m ULTIMA JOGADA: (%d, %d)\033[0;0m\n", campoMinado.coordenada.i, campoMinado.coordenada.j);
     // printf("\033[47;6;31;7m VOCÊ PERDEU! \033[0;0m\n");
 
     // printf("\033[41;1m ");
   
-  // printf("\033[43;31m VOCÊ PERDEU! \033[0;0m\n");
+  // printf("\033[43;31m VOCÊ PERDEU! BOMBA EM (%d, %d)\033[0;0m\n");
   // printf("\033[42;1m VOCÊ GANHOU! \033[0;0m\n");
   // printf("\n");
   
   printf("SAIR (0,0) | NOVO JOGO (9,9)\n");
-  printf("COMANDO | POSICAO (x, y): ");
+  printf("COMANDO | POSICAO (linha, coluna): ");
 }
 
 
@@ -259,6 +266,7 @@ void introducao(){
   system("sleep 3");
 }
 
+
 void bannerMenu(void *dados) {
   system("clear");
   printf("   ___                              \n");
@@ -307,7 +315,7 @@ void bannerNivel(void *dados) {
   printf("=          3 - Dificil         =\n");
   printf("================================\n");
 
-  printf("Selecionar %d -> ", campoMinado.nivel);
+  printf("Selecionar: ");
 
 }
 
@@ -323,6 +331,7 @@ void obterComando(int *opcao, void (*template)(void *da), void *dados ) {
 
     fflush(stdin);    
     gets(&comando);
+    printf("\n");
 
     *opcao = parseInt(comando);
     
@@ -330,4 +339,43 @@ void obterComando(int *opcao, void (*template)(void *da), void *dados ) {
       break;
   
   } while(true);
+}
+
+
+void jogo(struct CampoMinado* campoMinado){
+
+  criarCampoMinado(campoMinado);
+  
+  struct Coordenada coordenada;
+
+  do {
+   
+    desenharCampoMinado(*campoMinado);
+
+    scanf("%d %d", &coordenada.i, &coordenada.j);
+
+    bool limiteLateralEsquerdo = coordenada.i > 0;
+    bool limiteLateralDireito  = coordenada.i < MAX - 1;
+    bool limiteAlturaSuperior  = coordenada.j > 0;
+    bool limiteAlturaInferior  = coordenada.j < MAX - 1;
+
+    if(limiteLateralEsquerdo && limiteLateralDireito && limiteAlturaSuperior && limiteAlturaInferior ) {
+      campoMinado->campoJogadas[coordenada.i][coordenada.j] = 1;
+
+      bool encontrouBomba = campoMinado->campo[coordenada.i][coordenada.j] == BOMBA;
+
+      if(encontrouBomba)
+        campoMinado->fimDoJogo = !campoMinado->fimDoJogo;
+      else
+        campoMinado->jogadas--;
+    }
+
+    if( coordenada.i == 9 && coordenada.j == 9)
+      criarCampoMinado(campoMinado);
+    else if( coordenada.i == 0 && coordenada.j == 0)
+      break;
+
+  } while(campoMinado->jogadas != 0 || !campoMinado->fimDoJogo);
+  
+  // system("sleep 5");
 }
