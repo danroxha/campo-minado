@@ -7,12 +7,12 @@
 #include "banner.h"
 
 
-int calcularJogadasDisponiveis(char [MAX][MAX]);
 void criarCampoMinado(struct CampoMinado*);
 void gerarDica(struct CampoMinado*);
 void jogo(struct CampoMinado* );
+void desenharTabuleiro(struct CampoMinado);
 void desenharCampoMinado(struct CampoMinado);
-void obterComando(int *opcao, void (*template)(void *), void *dados);
+void obterComando(int *opcao, void (*)(void *), void *dados);
 
 
 int main(){
@@ -21,10 +21,11 @@ int main(){
     campoMinado.nivel = 1;
 
   enum OPCOES {
-    INICAR_JOGO = 1, SELECIONAR_NIVEL = 2, SAIR = 3
+    INICIAR_JOGO = 1, SELECIONAR_NIVEL = 2, SAIR = 3
   };
 
   int opcao;
+
   bannerIntroducao(); 
 
   do {
@@ -32,7 +33,7 @@ int main(){
     obterComando(&opcao, bannerMenu, NULL);
 
     switch(opcao) {
-      case INICAR_JOGO: 
+      case INICIAR_JOGO: 
         jogo(&campoMinado);
         break;
       case SELECIONAR_NIVEL:
@@ -54,10 +55,11 @@ void criarCampoMinado(struct CampoMinado* campoMinado) {
   srand(clock());
   
   campoMinado->bombas = 0;
+  campoMinado->jogadas = 0;
   campoMinado->fimDoJogo = false;
   campoMinado->coordenada.i = 0;
   campoMinado->coordenada.j = 0;
-  
+
   for(int i = 0; i < MAX; i++) {
     for(int j = 0; j < MAX; j++) {
 
@@ -81,8 +83,8 @@ void criarCampoMinado(struct CampoMinado* campoMinado) {
       }
         
       enum Porcentagem {
-        DEZ             = 10, 
-        VINTE           = 20, 
+        QUINZE          = 15, 
+        VINTE_E_CINCO   = 25, 
         TRINTA_E_CINCO  = 35, 
         SESSENTA        = 60, 
         CEM             = 100
@@ -97,29 +99,29 @@ void criarCampoMinado(struct CampoMinado* campoMinado) {
       int chanceDeBomba;
 
       switch(campoMinado->nivel) {
-        default     : chanceDeBomba = DEZ;            break;
-        case FACIL  : chanceDeBomba = VINTE;          break;
-        case MEDIO  : chanceDeBomba = TRINTA_E_CINCO; break;
-        case DIFICIL: chanceDeBomba = SESSENTA;       break;
+        default     : chanceDeBomba = SESSENTA;       break;
+        case FACIL  : chanceDeBomba = QUINZE;         break;
+        case MEDIO  : chanceDeBomba = VINTE_E_CINCO;  break;
+        case DIFICIL: chanceDeBomba = TRINTA_E_CINCO; break;
       }
       
       campoMinado->campo[i][j] = (char)(rand() % CEM <= chanceDeBomba )? BOMBA : VAZIO;
       
       if(campoMinado->campo[i][j] == BOMBA)
         campoMinado->bombas++;
+      else
+        campoMinado->jogadas++;
     }
   }
 
   if(!campoMinado->bombas) 
     criarCampoMinado(campoMinado);
-  else
-    campoMinado->jogadas = calcularJogadasDisponiveis(campoMinado->campo);
 
   gerarDica(campoMinado);
 }
 
 
-void desenharCampoMinado(struct CampoMinado campoMinado) {
+void desenharTabuleiro(struct CampoMinado campoMinado) {
 
   system("clear");
   printf("\033[40;7m");
@@ -130,6 +132,23 @@ void desenharCampoMinado(struct CampoMinado campoMinado) {
   }
 
   printf("Bombas: %d | Jogadas: %d \033[0;0m\n", campoMinado.bombas, campoMinado.jogadas);
+
+  desenharCampoMinado(campoMinado);
+
+  if( campoMinado.fimDoJogo && campoMinado.jogadas > 0)
+    printf("\033[47;31;7m VOCÊ PERDEU! BOMBA EM (%d, %d)\033[0;0m\n", campoMinado.coordenada.i, campoMinado.coordenada.j);
+  else if( !campoMinado.fimDoJogo && campoMinado.jogadas <= 0)
+    printf("\033[42;1m VOCÊ GANHOU! \033[0;0m\n");
+  else
+    printf("\033[41;1m ULTIMA JOGADA: (%d, %d)\033[0;0m\n", campoMinado.coordenada.i, campoMinado.coordenada.j);
+   
+  printf("VOLTAR (0,0) | NOVO JOGO (9,9)\n");
+  printf("COMANDO | POSICAO (linha, coluna): ");
+}
+
+
+void desenharCampoMinado(struct CampoMinado campoMinado) {
+
   for(int i = 0; i < MAX; i++) {
     if(i != 0 && i < MAX - 1) printf("%d", i);
     else printf("  ");    
@@ -157,16 +176,6 @@ void desenharCampoMinado(struct CampoMinado campoMinado) {
 
     printf("\n");
   }
-
-  if( campoMinado.fimDoJogo && campoMinado.jogadas > 0)
-    printf("\033[47;31;7m VOCÊ PERDEU! BOMBA EM (%d, %d)\033[0;0m\n", campoMinado.coordenada.i, campoMinado.coordenada.j);
-  else if( !campoMinado.fimDoJogo && campoMinado.jogadas <= 0)
-    printf("\033[42;1m VOCÊ GANHOU! \033[0;0m\n");
-  else
-    printf("\033[41;1m ULTIMA JOGADA: (%d, %d)\033[0;0m\n", campoMinado.coordenada.i, campoMinado.coordenada.j);
-   
-  printf("VOLTAR (0,0) | NOVO JOGO (9,9)\n");
-  printf("COMANDO | POSICAO (linha, coluna): ");
 }
 
 
@@ -206,21 +215,6 @@ void gerarDica(struct CampoMinado* campoMinado) {
 }
 
 
-int calcularJogadasDisponiveis(char campoMinado[MAX][MAX]) {
-  
-  int contador = 0;
-  
-  for(int i = 1;  i < MAX - 1; i++) {
-    for(int j = 1;  j < MAX - 1; j++) {
-      if(campoMinado[i][j] >= VAZIO && campoMinado[i][j] < BOMBA)
-        contador++;
-    }
-  }
-    
-  return contador;
-}
-
-
 void obterComando(int *opcao, void (*template)(void *da), void *dados ) {
  
   do {
@@ -247,12 +241,11 @@ void obterComando(int *opcao, void (*template)(void *da), void *dados ) {
       system("sleep .4");      
     } 
     
-  
   } while(true);
 }
 
 
-void jogo(struct CampoMinado* campoMinado){
+void jogo(struct CampoMinado* campoMinado) {
 
   criarCampoMinado(campoMinado);
   
@@ -260,7 +253,7 @@ void jogo(struct CampoMinado* campoMinado){
 
   do {
    
-    desenharCampoMinado(*campoMinado);
+    desenharTabuleiro(*campoMinado);
 
     scanf("%d %d", &coordenada.i, &coordenada.j);
     setbuf(stdin, NULL);
@@ -301,5 +294,4 @@ void jogo(struct CampoMinado* campoMinado){
     }
 
   } while(campoMinado->jogadas != 0 || !campoMinado->fimDoJogo);
-  
 }
