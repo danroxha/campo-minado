@@ -95,7 +95,7 @@ void bannerSair(void) {
   printf("  __/   \033[1;33;5m-\033[0;0m\033[31;1m*\033[0;0m\033[1;33;5m-\033[0;0m     * Daniel Rocha\n");
   printf("\033[30;30;1m,d08b.\033[0;0m  \033[1;33;5m'|`\033[0;0m     * Tadeu Viegas \n");
   printf("\033[30;30;1m0088MM\033[0;0m         \n");
-  printf("\033[30;30;1m`9MMP'\033[0;0m        2020\n");
+  printf("\033[30;30;1m`9MMP'\033[0;0m               2020\n");
   printf("\n\n\n\n");
   system("sleep 1.5");  
 }
