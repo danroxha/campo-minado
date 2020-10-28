@@ -5,7 +5,6 @@
 
 #include "type.h"
 #include "banner.h"
-#include "util.h"
 
 
 int calcularJogadasDisponiveis(char [MAX][MAX]);
@@ -26,20 +25,23 @@ int main(){
   };
 
   int opcao;
-  introducao(); 
+  bannerIntroducao(); 
 
   do {
     
     obterComando(&opcao, bannerMenu, NULL);
 
-    switch(opcao){
-    case INICAR_JOGO: 
-      jogo(&campoMinado);
-      break;
-    case SELECIONAR_NIVEL:
-      obterComando(&campoMinado.nivel, bannerNivel, (void*) &campoMinado);
-      break;
+    switch(opcao) {
+      case INICAR_JOGO: 
+        jogo(&campoMinado);
+        break;
+      case SELECIONAR_NIVEL:
+        obterComando(&campoMinado.nivel, bannerNivel, (void*) &campoMinado);
+        break;
     }
+
+    if( opcao == SAIR)
+      bannerSair();
   }
 
   while(opcao != SAIR);
@@ -128,10 +130,16 @@ void desenharCampoMinado(struct CampoMinado campoMinado) {
   }
 
   printf("Bombas: %d | Jogadas: %d \033[0;0m\n", campoMinado.bombas, campoMinado.jogadas);
-  printf("  12345678\n");
+  for(int i = 0; i < MAX; i++) {
+    if(i != 0 && i < MAX - 1) printf("%d", i);
+    else printf("  ");    
+  }
+
+  printf("\n");
   
   for(int i = 0; i < MAX; i++) {
-    if(i != 0 && i < MAX - 1) printf("%d",i);
+    
+    if(i != 0 && i < MAX - 1) printf("%d", i);
     else printf(" ");  
 
     for(int j = 0; j < MAX; j++) {
@@ -152,17 +160,12 @@ void desenharCampoMinado(struct CampoMinado campoMinado) {
 
   if( campoMinado.fimDoJogo && campoMinado.jogadas > 0)
     printf("\033[47;31;7m VOCÊ PERDEU! BOMBA EM (%d, %d)\033[0;0m\n", campoMinado.coordenada.i, campoMinado.coordenada.j);
+  else if( !campoMinado.fimDoJogo && campoMinado.jogadas <= 0)
+    printf("\033[42;1m VOCÊ GANHOU! \033[0;0m\n");
   else
     printf("\033[41;1m ULTIMA JOGADA: (%d, %d)\033[0;0m\n", campoMinado.coordenada.i, campoMinado.coordenada.j);
-    // printf("\033[47;6;31;7m VOCÊ PERDEU! \033[0;0m\n");
-
-    // printf("\033[41;1m ");
-  
-  // printf("\033[43;31m VOCÊ PERDEU! BOMBA EM (%d, %d)\033[0;0m\n");
-  // printf("\033[42;1m VOCÊ GANHOU! \033[0;0m\n");
-  // printf("\n");
-  
-  printf("SAIR (0,0) | NOVO JOGO (9,9)\n");
+   
+  printf("VOLTAR (0,0) | NOVO JOGO (9,9)\n");
   printf("COMANDO | POSICAO (linha, coluna): ");
 }
 
@@ -222,19 +225,28 @@ void obterComando(int *opcao, void (*template)(void *da), void *dados ) {
  
   do {
     
-    char comando;
+    int comando;
     
     if(template)
       template(dados);
 
-    fflush(stdin);    
-    gets(&comando);
-    printf("\n");
-
-    *opcao = parseInt(comando);
+    setbuf(stdin, NULL);
+    scanf("%d", &comando);
     
-    if(*opcao > 0 && *opcao < 4 )
+    if(comando > 0 && comando < 4) {
+      *opcao = comando;
+      
+      if(template)
+        template(dados);
+
+      printf("\n");
       break;
+    }
+    else {
+      printf("\033[43;31mCOMANDO INVALIDO\033[0;0m\n");
+      system("sleep .4");      
+    } 
+    
   
   } while(true);
 }
@@ -251,15 +263,21 @@ void jogo(struct CampoMinado* campoMinado){
     desenharCampoMinado(*campoMinado);
 
     scanf("%d %d", &coordenada.i, &coordenada.j);
+    setbuf(stdin, NULL);
 
     bool limiteLateralEsquerdo = coordenada.i > 0;
     bool limiteLateralDireito  = coordenada.i < MAX - 1;
     bool limiteAlturaSuperior  = coordenada.j > 0;
     bool limiteAlturaInferior  = coordenada.j < MAX - 1;
 
-    if(limiteLateralEsquerdo && limiteLateralDireito && limiteAlturaSuperior && limiteAlturaInferior ) {
+    if( limiteLateralEsquerdo && limiteLateralDireito &&
+        limiteAlturaSuperior && limiteAlturaInferior && !campoMinado->fimDoJogo ) 
+    {
+      
       campoMinado->campoJogadas[coordenada.i][coordenada.j] = 1;
-
+      campoMinado->coordenada.i = coordenada.i;
+      campoMinado->coordenada.j = coordenada.j;
+      
       bool encontrouBomba = campoMinado->campo[coordenada.i][coordenada.j] == BOMBA;
 
       if(encontrouBomba)
@@ -268,12 +286,20 @@ void jogo(struct CampoMinado* campoMinado){
         campoMinado->jogadas--;
     }
 
+
+    bool IforaDosLimite = (coordenada.i < 0 || coordenada.i >= MAX );
+    bool JforaDosLimite = (coordenada.j < 0 || coordenada.j >= MAX );
+
+
     if( coordenada.i == 9 && coordenada.j == 9)
       criarCampoMinado(campoMinado);
-    else if( coordenada.i == 0 && coordenada.j == 0)
+    else if(coordenada.i == 0 && coordenada.j == 0)
       break;
+    else if(IforaDosLimite || JforaDosLimite) {
+      printf("\033[43;31mCOMANDO OU POSICAO INVALIDO\033[0;0m\n");
+      system("sleep .5");
+    }
 
   } while(campoMinado->jogadas != 0 || !campoMinado->fimDoJogo);
   
-  // system("sleep 5");
 }
