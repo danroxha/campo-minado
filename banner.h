@@ -6,7 +6,7 @@
 #include "type.h"
 
 
-void introducao(){
+void bannerIntroducao(void) {
 
   system("clear");
   
@@ -30,7 +30,7 @@ void introducao(){
   printf("::..:::::..::....::..::::..::..:::::..::........::::.......::::\n");
   printf("\033[0;0m\n");
   
-  system("sleep 3");
+  system("sleep 1.5");
 }
 
 
@@ -50,7 +50,7 @@ void bannerMenu(void *dados) {
   printf("\n================ Menu =================\n");
   printf("=          1 - Novo Jogo              =\n");
   printf("=          2 - Selecionar Nivel       =\n");
-  printf("=          3 - Sair                   =\n");
+  printf("=          \033[33;31m3 - Sair\033[0;0m                   =\n");
   printf("====================== Versao: %s ==\n", VERSAO);
   printf("Opcao: ");
 
@@ -77,14 +77,27 @@ void bannerNivel(void *dados) {
   printf("             ▐                  \n");
   printf("\033[0;0m\n");
   printf("====================================\n");
-  printf("=            1 - Facil             =\n");
-  printf("=            2 - Medio             =\n");
-  printf("=            3 - Dificil           =\n");
+  printf("=            \033[33;34m1 - Facil   \033[0;0m          =\n");
+  printf("=            \033[33;32m2 - Medio   \033[0;0m          =\n");
+  printf("=            \033[33;31m3 - Dificil \033[0;0m          =\n");
   printf("====================================\n");
 
   printf("Selecionar: ");
   system("sleep .3");   
 
+}
+
+
+void bannerSair(void) {
+  system("clear");
+  printf("\n\n\n\n");
+  printf("     ,--\033[1;33;5m.!,\033[0;0m    Desenvolvido por \n");
+  printf("  __/   \033[1;33;5m-\033[0;0m\033[31;1m*\033[0;0m\033[1;33;5m-\033[0;0m     * Daniel Rocha\n");
+  printf("\033[30;30;1m,d08b.\033[0;0m  \033[1;33;5m'|`\033[0;0m     * Tadeu Viegas \n");
+  printf("\033[30;30;1m0088MM\033[0;0m         \n");
+  printf("\033[30;30;1m`9MMP'\033[0;0m        2020\n");
+  printf("\n\n\n\n");
+  system("sleep 1.5");  
 }
 
 
