@@ -7,7 +7,7 @@
 #define MAX 10
 #define BOMBA 9
 #define VAZIO 0
-#define VERSAO "0.0.1"
+#define VERSAO "0.0.2"
 
 
 
