@@ -36,6 +36,7 @@ void introducao(){
 
 void bannerMenu(void *dados) {
   system("clear");
+  printf("\033[33;33;5m");
   printf("   ___                              \n");
   printf("  / __|  __ _   _ __    _ __   ___  \n");
   printf(" | (__  / _` | | '  \\  | '_ \\ / _ \\ \n");
@@ -45,7 +46,7 @@ void bannerMenu(void *dados) {
   printf("  _ __   (_)  _ _    __ _   __| |  ___  \n");
   printf(" | '  \\  | | | ' \\  / _` | / _` | / _ \\ \n");
   printf(" |_|_|_| |_| |_||_| \\__,_| \\__,_| \\___/ \n");
-                                         
+  printf("\033[0;0m\n");                                       
   printf("\n================ Menu =================\n");
   printf("=          1 - Novo Jogo              =\n");
   printf("=          2 - Selecionar Nivel       =\n");
@@ -82,6 +83,7 @@ void bannerNivel(void *dados) {
   printf("====================================\n");
 
   printf("Selecionar: ");
+  system("sleep .3");   
 
 }
 
