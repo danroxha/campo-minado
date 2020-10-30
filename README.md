@@ -15,4 +15,4 @@ Implementação do jogo campo minado em C.
 
 ## Considerações
 
-O Jogo utilizar alguns recurso especificos do UNIX, comandos: sleep e clear.
+O jogo utilizar alguns recurso especificos de sistemas UNIX, comandos: sleep e clear.
