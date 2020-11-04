@@ -1,9 +1,17 @@
 #ifndef __C_MINADO_BANNER_H__
 #define __C_MINADO_BANNER_H__
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "type.h"
+
+
+void bannerIntroducao(void);
+void bannerMenu(void *);
+void bannerNivel(void *);
+void bannerSair(void);
+
 
 
 void bannerIntroducao(void) {

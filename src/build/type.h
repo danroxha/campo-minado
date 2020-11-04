@@ -8,7 +8,26 @@
 #define BOMBA 9
 #define VAZIO 0
 #define VERSAO "0.0.2"
+#define ATIVADO 1
+#define DESATIVADO 0
 
+
+enum Porcentagem 
+{
+  P_QUINZE          = 15, 
+  P_VINTE_E_CINCO   = 25, 
+  P_TRINTA_E_CINCO  = 35, 
+  P_SESSENTA        = 60, 
+  P_CEM             = 100
+};
+
+
+enum Niveis 
+{
+  FACIL   = 1,
+  MEDIO   = 2,
+  DIFICIL = 3
+};
 
 
 struct Coordenada
