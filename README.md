@@ -4,14 +4,15 @@ Implementação do jogo campo minado em C.
 
 ## Screenshot
 
-<div style="display: inline-block">
-    <img width='47%' height='300px' src="screenshot/intro.gif" />
-    <img width='47%' height='300px' src="screenshot/menu.gif" />
-    <img width='47%' height='300px' src="screenshot/submenu.png" />
-    <img width='47%' height='300px' src="screenshot/ingame.png" />
-    <img width='47%' height='300px' src="screenshot/perdeu.gif" />
-    <img width='47%' height='300px' src="screenshot/sair.gif" />
-</div>
+<p align="center" display="flex">
+    
+  <img width="320" src="screenshot/intro.gif" />
+  <img width="320" src="screenshot/menu.gif" />
+  <img width="320" src="screenshot/submenu.png" />
+  <img width="320" src="screenshot/ingame.png" />
+  <img width="320" src="screenshot/perdeu.gif" />
+  <img width="320" src="screenshot/sair.gif" />
+</p>
 
 ## Considerações
 
